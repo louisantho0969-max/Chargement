@@ -20,7 +20,7 @@ panel.Position = UDim2.fromScale(0.5, 0.5)
 panel.BackgroundColor3 = Color3.fromRGB(245, 248, 252)
 panel.BorderSizePixel = 0
 panel.Active = true
-panel.Draggable = true
+panel.Draggable = false
 panel.Parent = gui
 Instance.new("UICorner", panel).CornerRadius = UDim.new(0, 14)
 local stroke = Instance.new("UIStroke", panel)
@@ -107,6 +107,22 @@ fill.BackgroundColor3 = Color3.fromRGB(24, 95, 165)
 fill.BorderSizePixel = 0
 fill.Parent = track
 Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
+
+-- A3K
+local tag = Instance.new("TextLabel")
+tag.Size = UDim2.new(1, 0, 0, 24)
+tag.Position = UDim2.new(0, 0, 0, 224)
+tag.BackgroundTransparency = 1
+tag.Font = Enum.Font.GothamBold
+tag.TextSize = 16
+tag.TextColor3 = Color3.fromRGB(24, 95, 165)
+tag.Text = "A3K"
+tag.Parent = panel
+
+-- Destruction automatique après 15 secondes
+task.delay(15, function()
+	if gui then gui:Destroy() end
+end)
 
 -- Animations
 local conn = RunService.RenderStepped:Connect(function(dt)
