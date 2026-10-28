@@ -1,0 +1,129 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local parent = (gethui and gethui()) or Players.LocalPlayer:WaitForChild("PlayerGui")
+
+local old = parent:FindFirstChild("PanelChargement")
+if old then old:Destroy() end
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "PanelChargement"
+gui.ResetOnSpawn = false
+gui.Parent = parent
+
+-- Panel
+local panel = Instance.new("Frame")
+panel.Size = UDim2.fromOffset(320, 260)
+panel.AnchorPoint = Vector2.new(0.5, 0.5)
+panel.Position = UDim2.fromScale(0.5, 0.5)
+panel.BackgroundColor3 = Color3.fromRGB(245, 248, 252)
+panel.BorderSizePixel = 0
+panel.Active = true
+panel.Draggable = true
+panel.Parent = gui
+Instance.new("UICorner", panel).CornerRadius = UDim.new(0, 14)
+local stroke = Instance.new("UIStroke", panel)
+stroke.Color = Color3.fromRGB(181, 212, 244)
+stroke.Thickness = 1.5
+
+-- Anneau + points qui tournent
+local spinner = Instance.new("Frame")
+spinner.Size = UDim2.fromOffset(120, 120)
+spinner.AnchorPoint = Vector2.new(0.5, 0)
+spinner.Position = UDim2.new(0.5, 0, 0, 24)
+spinner.BackgroundTransparency = 1
+spinner.Parent = panel
+
+local ring = Instance.new("Frame")
+ring.Size = UDim2.fromOffset(112, 112)
+ring.AnchorPoint = Vector2.new(0.5, 0.5)
+ring.Position = UDim2.fromScale(0.5, 0.5)
+ring.BackgroundTransparency = 1
+ring.Parent = spinner
+Instance.new("UICorner", ring).CornerRadius = UDim.new(1, 0)
+local ringStroke = Instance.new("UIStroke", ring)
+ringStroke.Color = Color3.fromRGB(181, 212, 244)
+ringStroke.Thickness = 2
+ringStroke.Transparency = 0.5
+
+local dots = {
+	{size = 18, color = Color3.fromRGB(24, 95, 165), alpha = 0},
+	{size = 16, color = Color3.fromRGB(55, 138, 221), alpha = 0},
+	{size = 14, color = Color3.fromRGB(55, 138, 221), alpha = 0.2},
+	{size = 12, color = Color3.fromRGB(133, 183, 235), alpha = 0.3},
+	{size = 10, color = Color3.fromRGB(133, 183, 235), alpha = 0.5},
+	{size = 8, color = Color3.fromRGB(181, 212, 244), alpha = 0.6},
+}
+
+for i, d in ipairs(dots) do
+	local a = math.rad((i - 1) * 60)
+	local dot = Instance.new("Frame")
+	dot.Size = UDim2.fromOffset(d.size, d.size)
+	dot.AnchorPoint = Vector2.new(0.5, 0.5)
+	dot.Position = UDim2.new(0.5, math.sin(a) * 56, 0.5, -math.cos(a) * 56)
+	dot.BackgroundColor3 = d.color
+	dot.BackgroundTransparency = d.alpha
+	dot.BorderSizePixel = 0
+	dot.Parent = spinner
+	Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
+end
+
+-- Cercle central
+local center = Instance.new("Frame")
+center.Size = UDim2.fromOffset(44, 44)
+center.AnchorPoint = Vector2.new(0.5, 0.5)
+center.Position = UDim2.fromScale(0.5, 0.5)
+center.BackgroundColor3 = Color3.fromRGB(24, 95, 165)
+center.BorderSizePixel = 0
+center.Parent = spinner
+Instance.new("UICorner", center).CornerRadius = UDim.new(1, 0)
+
+-- Texte
+local label = Instance.new("TextLabel")
+label.Size = UDim2.new(1, 0, 0, 24)
+label.Position = UDim2.new(0, 0, 0, 160)
+label.BackgroundTransparency = 1
+label.Font = Enum.Font.GothamMedium
+label.TextSize = 16
+label.TextColor3 = Color3.fromRGB(30, 41, 59)
+label.Text = "Chargement en cours"
+label.Parent = panel
+
+-- Barre de progression
+local track = Instance.new("Frame")
+track.Size = UDim2.fromOffset(240, 10)
+track.AnchorPoint = Vector2.new(0.5, 0)
+track.Position = UDim2.new(0.5, 0, 0, 200)
+track.BackgroundColor3 = Color3.fromRGB(181, 212, 244)
+track.BackgroundTransparency = 0.5
+track.BorderSizePixel = 0
+track.Parent = panel
+Instance.new("UICorner", track).CornerRadius = UDim.new(1, 0)
+
+local fill = Instance.new("Frame")
+fill.Size = UDim2.fromScale(0, 1)
+fill.BackgroundColor3 = Color3.fromRGB(24, 95, 165)
+fill.BorderSizePixel = 0
+fill.Parent = track
+Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
+
+-- Animations
+local conn = RunService.RenderStepped:Connect(function(dt)
+	spinner.Rotation = (spinner.Rotation + dt * 225) % 360
+end)
+
+task.spawn(function()
+	local n = 0
+	while gui.Parent do
+		fill.Size = UDim2.fromScale(0, 1)
+		local tween = TweenService:Create(fill, TweenInfo.new(2.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = UDim2.fromScale(1, 1)})
+		tween:Play()
+		for _ = 1, 4 do
+			n = (n % 3) + 1
+			label.Text = "Chargement en cours" .. string.rep(".", n)
+			task.wait(0.7)
+		end
+	end
+	conn:Disconnect()
+end)
