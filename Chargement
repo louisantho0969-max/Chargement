@@ -1,145 +1,280 @@
+
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
-local parent = (gethui and gethui()) or Players.LocalPlayer:WaitForChild("PlayerGui")
+local player = Players.LocalPlayer
+local parent = player:WaitForChild("PlayerGui")
 
-local old = parent:FindFirstChild("PanelChargement")
-if old then old:Destroy() end
+local VALID_KEY = "VNX-2026-7K9X"
+local DISCORD_LINK = "https://discord.gg/W8g44E5rX"
 
+-- Nettoyage
+for _, name in ipairs({"KeySystem", "PanelChargement"}) do
+    local old = parent:FindFirstChild(name)
+    if old then old:Destroy() end
+end
+
+-- KEY SYSTEM
 local gui = Instance.new("ScreenGui")
-gui.Name = "PanelChargement"
+gui.Name = "KeySystem"
 gui.ResetOnSpawn = false
 gui.Parent = parent
 
--- Panel
-local panel = Instance.new("Frame")
-panel.Size = UDim2.fromOffset(320, 260)
-panel.AnchorPoint = Vector2.new(0.5, 0.5)
-panel.Position = UDim2.fromScale(0.5, 0.5)
-panel.BackgroundColor3 = Color3.fromRGB(245, 248, 252)
-panel.BorderSizePixel = 0
-panel.Active = true
-panel.Draggable = false
-panel.Parent = gui
-Instance.new("UICorner", panel).CornerRadius = UDim.new(0, 14)
-local stroke = Instance.new("UIStroke", panel)
-stroke.Color = Color3.fromRGB(181, 212, 244)
-stroke.Thickness = 1.5
+local frame = Instance.new("Frame")
+frame.Size = UDim2.fromOffset(320, 185)
+frame.Position = UDim2.fromScale(0.5, 0.5)
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
+frame.BorderSizePixel = 0
+frame.Parent = gui
 
--- Anneau + points qui tournent
-local spinner = Instance.new("Frame")
-spinner.Size = UDim2.fromOffset(120, 120)
-spinner.AnchorPoint = Vector2.new(0.5, 0)
-spinner.Position = UDim2.new(0.5, 0, 0, 24)
-spinner.BackgroundTransparency = 1
-spinner.Parent = panel
+Instance.new("UICorner", frame).CornerRadius =
+    UDim.new(0, 12)
 
-local ring = Instance.new("Frame")
-ring.Size = UDim2.fromOffset(112, 112)
-ring.AnchorPoint = Vector2.new(0.5, 0.5)
-ring.Position = UDim2.fromScale(0.5, 0.5)
-ring.BackgroundTransparency = 1
-ring.Parent = spinner
-Instance.new("UICorner", ring).CornerRadius = UDim.new(1, 0)
-local ringStroke = Instance.new("UIStroke", ring)
-ringStroke.Color = Color3.fromRGB(181, 212, 244)
-ringStroke.Thickness = 2
-ringStroke.Transparency = 0.5
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 40)
+title.BackgroundTransparency = 1
+title.Text = "A3K | KEY SYSTEM"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.Parent = frame
 
-local dots = {
-	{size = 18, color = Color3.fromRGB(24, 95, 165), alpha = 0},
-	{size = 16, color = Color3.fromRGB(55, 138, 221), alpha = 0},
-	{size = 14, color = Color3.fromRGB(55, 138, 221), alpha = 0.2},
-	{size = 12, color = Color3.fromRGB(133, 183, 235), alpha = 0.3},
-	{size = 10, color = Color3.fromRGB(133, 183, 235), alpha = 0.5},
-	{size = 8, color = Color3.fromRGB(181, 212, 244), alpha = 0.6},
-}
+local input = Instance.new("TextBox")
+input.Size = UDim2.new(1, -30, 0, 38)
+input.Position = UDim2.fromOffset(15, 48)
+input.BackgroundColor3 = Color3.fromRGB(42, 42, 52)
+input.TextColor3 = Color3.new(1, 1, 1)
+input.PlaceholderText = "Enter your key..."
+input.PlaceholderColor3 = Color3.fromRGB(170, 170, 170)
+input.Text = ""
+input.ClearTextOnFocus = false
+input.Font = Enum.Font.Gotham
+input.TextSize = 14
+input.Parent = frame
 
-for i, d in ipairs(dots) do
-	local a = math.rad((i - 1) * 60)
-	local dot = Instance.new("Frame")
-	dot.Size = UDim2.fromOffset(d.size, d.size)
-	dot.AnchorPoint = Vector2.new(0.5, 0.5)
-	dot.Position = UDim2.new(0.5, math.sin(a) * 56, 0.5, -math.cos(a) * 56)
-	dot.BackgroundColor3 = d.color
-	dot.BackgroundTransparency = d.alpha
-	dot.BorderSizePixel = 0
-	dot.Parent = spinner
-	Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
+Instance.new("UICorner", input).CornerRadius =
+    UDim.new(0, 7)
+
+local function makeButton(text, pos, size)
+    local b = Instance.new("TextButton")
+    b.Size = size
+    b.Position = pos
+    b.BackgroundColor3 = Color3.fromRGB(24, 95, 165)
+    b.TextColor3 = Color3.new(1, 1, 1)
+    b.Text = text
+    b.Font = Enum.Font.GothamBold
+    b.TextSize = 13
+    b.Parent = frame
+    Instance.new("UICorner", b).CornerRadius =
+        UDim.new(0, 7)
+    return b
 end
 
--- Cercle central
-local center = Instance.new("Frame")
-center.Size = UDim2.fromOffset(44, 44)
-center.AnchorPoint = Vector2.new(0.5, 0.5)
-center.Position = UDim2.fromScale(0.5, 0.5)
-center.BackgroundColor3 = Color3.fromRGB(24, 95, 165)
-center.BorderSizePixel = 0
-center.Parent = spinner
-Instance.new("UICorner", center).CornerRadius = UDim.new(1, 0)
+local submit = makeButton(
+    "SUBMIT",
+    UDim2.fromOffset(15, 98),
+    UDim2.new(0.5, -20, 0, 35)
+)
 
--- Texte
-local label = Instance.new("TextLabel")
-label.Size = UDim2.new(1, 0, 0, 24)
-label.Position = UDim2.new(0, 0, 0, 160)
-label.BackgroundTransparency = 1
-label.Font = Enum.Font.GothamMedium
-label.TextSize = 16
-label.TextColor3 = Color3.fromRGB(30, 41, 59)
-label.Text = "Chargement en cours"
-label.Parent = panel
+local getKey = makeButton(
+    "GET KEY",
+    UDim2.new(0.5, 5, 0, 98),
+    UDim2.new(0.5, -20, 0, 35)
+)
 
--- Barre de progression
-local track = Instance.new("Frame")
-track.Size = UDim2.fromOffset(240, 10)
-track.AnchorPoint = Vector2.new(0.5, 0)
-track.Position = UDim2.new(0.5, 0, 0, 200)
-track.BackgroundColor3 = Color3.fromRGB(181, 212, 244)
-track.BackgroundTransparency = 0.5
-track.BorderSizePixel = 0
-track.Parent = panel
-Instance.new("UICorner", track).CornerRadius = UDim.new(1, 0)
+local status = Instance.new("TextLabel")
+status.Size = UDim2.new(1, -20, 0, 28)
+status.Position = UDim2.fromOffset(10, 143)
+status.BackgroundTransparency = 1
+status.Text = "Enter your key"
+status.TextColor3 = Color3.fromRGB(180, 180, 190)
+status.Font = Enum.Font.Gotham
+status.TextSize = 12
+status.Parent = frame
 
-local fill = Instance.new("Frame")
-fill.Size = UDim2.fromScale(0, 1)
-fill.BackgroundColor3 = Color3.fromRGB(24, 95, 165)
-fill.BorderSizePixel = 0
-fill.Parent = track
-Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
-
--- A3K
-local tag = Instance.new("TextLabel")
-tag.Size = UDim2.new(1, 0, 0, 24)
-tag.Position = UDim2.new(0, 0, 0, 224)
-tag.BackgroundTransparency = 1
-tag.Font = Enum.Font.GothamBold
-tag.TextSize = 16
-tag.TextColor3 = Color3.fromRGB(24, 95, 165)
-tag.Text = "A3K"
-tag.Parent = panel
-
--- Destruction automatique après 15 secondes
-task.delay(15, function()
-	if gui then gui:Destroy() end
+getKey.Activated:Connect(function()
+    input.Text = DISCORD_LINK
+    status.Text = "Key link copied into the box"
 end)
 
--- Animations
-local conn = RunService.RenderStepped:Connect(function(dt)
-	spinner.Rotation = (spinner.Rotation + dt * 225) % 360
-end)
+-- CHARGEMENT A3K
+local function showLoading()
+    local loading = Instance.new("ScreenGui")
+    loading.Name = "PanelChargement"
+    loading.ResetOnSpawn = false
+    loading.Parent = parent
 
-task.spawn(function()
-	local n = 0
-	while gui.Parent do
-		fill.Size = UDim2.fromScale(0, 1)
-		local tween = TweenService:Create(fill, TweenInfo.new(2.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = UDim2.fromScale(1, 1)})
-		tween:Play()
-		for _ = 1, 4 do
-			n = (n % 3) + 1
-			label.Text = "Chargement en cours" .. string.rep(".", n)
-			task.wait(0.7)
-		end
-	end
-	conn:Disconnect()
+    local panel = Instance.new("Frame")
+    panel.Size = UDim2.fromOffset(320, 260)
+    panel.AnchorPoint = Vector2.new(0.5, 0.5)
+    panel.Position = UDim2.fromScale(0.5, 0.5)
+    panel.BackgroundColor3 = Color3.fromRGB(245, 248, 252)
+    panel.BorderSizePixel = 0
+    panel.Parent = loading
+
+    Instance.new("UICorner", panel).CornerRadius =
+        UDim.new(0, 14)
+
+    local stroke = Instance.new("UIStroke", panel)
+    stroke.Color = Color3.fromRGB(181, 212, 244)
+    stroke.Thickness = 1.5
+
+    -- Spinner
+    local spinner = Instance.new("Frame")
+    spinner.Size = UDim2.fromOffset(120, 120)
+    spinner.AnchorPoint = Vector2.new(0.5, 0)
+    spinner.Position = UDim2.new(0.5, 0, 0, 24)
+    spinner.BackgroundTransparency = 1
+    spinner.Parent = panel
+
+    local ring = Instance.new("Frame")
+    ring.Size = UDim2.fromOffset(112, 112)
+    ring.AnchorPoint = Vector2.new(0.5, 0.5)
+    ring.Position = UDim2.fromScale(0.5, 0.5)
+    ring.BackgroundTransparency = 1
+    ring.Parent = spinner
+
+    Instance.new("UICorner", ring).CornerRadius =
+        UDim.new(1, 0)
+
+    local ringStroke = Instance.new("UIStroke", ring)
+    ringStroke.Color = Color3.fromRGB(181, 212, 244)
+    ringStroke.Thickness = 2
+    ringStroke.Transparency = 0.5
+
+    local dots = {
+        {18, Color3.fromRGB(24,95,165), 0},
+        {16, Color3.fromRGB(55,138,221), 0},
+        {14, Color3.fromRGB(55,138,221), 0.2},
+        {12, Color3.fromRGB(133,183,235), 0.3},
+        {10, Color3.fromRGB(133,183,235), 0.5},
+        {8, Color3.fromRGB(181,212,244), 0.6},
+    }
+
+    for i, d in ipairs(dots) do
+        local a = math.rad((i - 1) * 60)
+        local dot = Instance.new("Frame")
+        dot.Size = UDim2.fromOffset(d[1], d[1])
+        dot.AnchorPoint = Vector2.new(0.5, 0.5)
+        dot.Position = UDim2.new(
+            0.5, math.sin(a) * 56,
+            0.5, -math.cos(a) * 56
+        )
+        dot.BackgroundColor3 = d[2]
+        dot.BackgroundTransparency = d[3]
+        dot.BorderSizePixel = 0
+        dot.Parent = spinner
+        Instance.new("UICorner", dot).CornerRadius =
+            UDim.new(1, 0)
+    end
+
+    local center = Instance.new("Frame")
+    center.Size = UDim2.fromOffset(44, 44)
+    center.AnchorPoint = Vector2.new(0.5, 0.5)
+    center.Position = UDim2.fromScale(0.5, 0.5)
+    center.BackgroundColor3 = Color3.fromRGB(24, 95, 165)
+    center.BorderSizePixel = 0
+    center.Parent = spinner
+    Instance.new("UICorner", center).CornerRadius =
+        UDim.new(1, 0)
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 0, 24)
+    label.Position = UDim2.new(0, 0, 0, 160)
+    label.BackgroundTransparency = 1
+    label.Font = Enum.Font.GothamMedium
+    label.TextSize = 16
+    label.TextColor3 = Color3.fromRGB(30, 41, 59)
+    label.Text = "Chargement en cours"
+    label.Parent = panel
+
+    local track = Instance.new("Frame")
+    track.Size = UDim2.fromOffset(240, 10)
+    track.AnchorPoint = Vector2.new(0.5, 0)
+    track.Position = UDim2.new(0.5, 0, 0, 200)
+    track.BackgroundColor3 = Color3.fromRGB(181, 212, 244)
+    track.BackgroundTransparency = 0.5
+    track.BorderSizePixel = 0
+    track.Parent = panel
+    Instance.new("UICorner", track).CornerRadius =
+        UDim.new(1, 0)
+
+    local fill = Instance.new("Frame")
+    fill.Size = UDim2.fromScale(0, 1)
+    fill.BackgroundColor3 = Color3.fromRGB(24, 95, 165)
+    fill.BorderSizePixel = 0
+    fill.Parent = track
+    Instance.new("UICorner", fill).CornerRadius =
+        UDim.new(1, 0)
+
+    local tag = Instance.new("TextLabel")
+    tag.Size = UDim2.new(1, 0, 0, 24)
+    tag.Position = UDim2.new(0, 0, 0, 224)
+    tag.BackgroundTransparency = 1
+    tag.Font = Enum.Font.GothamBold
+    tag.TextSize = 16
+    tag.TextColor3 = Color3.fromRGB(24, 95, 165)
+    tag.Text = "A3K"
+    tag.Parent = panel
+
+    -- Animations
+    local running = true
+
+    local conn = RunService.RenderStepped:Connect(function(dt)
+        if not running then return end
+        spinner.Rotation =
+            (spinner.Rotation + dt * 225) % 360
+    end)
+
+    task.spawn(function()
+        local startTime = os.clock()
+        local n = 0
+
+        local tween = TweenService:Create(
+            fill,
+            TweenInfo.new(15, Enum.EasingStyle.Linear),
+            {Size = UDim2.fromScale(1, 1)}
+        )
+        tween:Play()
+
+        while os.clock() - startTime < 15
+            and loading.Parent do
+            n = (n % 3) + 1
+            label.Text = "Chargement en cours"
+                .. string.rep(".", n)
+            task.wait(0.7)
+        end
+
+        running = false
+        conn:Disconnect()
+
+        if loading.Parent then
+            loading:Destroy()
+        end
+    end)
+end
+
+-- VALIDATION
+local busy = false
+
+submit.Activated:Connect(function()
+    if busy then return end
+
+    local enteredKey = input.Text:match("^%s*(.-)%s*$")
+
+    if enteredKey == VALID_KEY then
+        busy = true
+        status.Text = "Key accepted!"
+        submit.Active = false
+        getKey.Active = false
+
+        task.wait(0.3)
+        gui:Destroy()
+        showLoading()
+    else
+        status.Text = "Invalid key!"
+        status.TextColor3 = Color3.fromRGB(255, 80, 80)
+    end
 end)
